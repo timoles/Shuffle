@@ -1,0 +1,47 @@
+# Caddy will automatically redirect to https if we dont supply :80
+
+# bind http://127.0.0.1:80 {
+# 	root * /usr/share/caddy/html
+# 	encode gzip
+# 	file_server
+# }
+
+bind localhost:443
+#redir https://{host}:3443{uri}
+root * /usr/share/caddy/html
+encode gzip
+file_server
+
+
+root * /usr/share/caddy/html
+encode gzip
+
+# log / syslog
+
+reverse_proxy /api/v1/* http://shuffle-backend:5001
+ 
+header / { 
+	# avoid clickjacking 
+	X-Frame-Options "DENY" 
+	 
+	# block MIME sniffing
+	X-Content-Type-Options "nosniff" 
+	 
+	# security headers 
+	X-XSS-Protection "1; mode=block";
+	 
+	# Content-Security-Policy "default-src 'self'" # TODO not set
+	# Strict-Transport-Security "max-age=31536000;" # TODO HSTS not set yet
+	 
+	# Set Referrer policy
+	Referrer-Policy "no-referrer"
+	 
+	# Disable server token 
+	-Server
+	 
+	Cache-Control "public" 
+	ETag ""
+	 
+	# If file or directory does not exist redirect to default route
+	try_files {path} {path}/ /index.html 
+}

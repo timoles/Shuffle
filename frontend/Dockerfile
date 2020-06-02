@@ -13,21 +13,18 @@ COPY . /usr/src/app
 RUN npm run-script build
 
 # Production environment
-from nginx:latest
+FROM caddy:2.0.0
 
-RUN mkdir -p /usr/share/nginx/html/build
-RUN mkdir -p /usr/share/nginx/html/css
-RUN mkdir -p /usr/share/nginx/html/js
-RUN mkdir -p /usr/share/nginx/html/img
+RUN mkdir -p /usr/share/caddy/html/build
+RUN mkdir -p /usr/share/caddy/html/css
+RUN mkdir -p /usr/share/caddy/html/js
+RUN mkdir -p /usr/share/caddy/html/img
 
-COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-
-#Localhost certificate challenge: Y#XwrJ#DoZGz2w6x
-COPY --from=builder /usr/src/app/certs/fullchain.pem /etc/nginx/fullchain.cert.pem
-COPY --from=builder /usr/src/app/certs/privkey.pem /etc/nginx/privkey.pem
+COPY --from=builder /usr/src/app/build /usr/share/caddy/html
 
 # Prod
-COPY --from=builder /usr/src/app/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /usr/src/app/Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
 EXPOSE 443
+
