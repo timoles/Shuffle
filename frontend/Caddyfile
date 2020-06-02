@@ -14,12 +14,24 @@ file_server
 
 
 root * /usr/share/caddy/html
-encode gzip
 
-# log / syslog
+#log stdout
+ 
+# If file or directory does not exist redirect to default route
+# This is a workaround because try_files cant match files. Because /api/xxx does never exist caddy will always ignore reverse_proxy and instead redirect to index.html https://caddy.community/t/try-files-and-reverse-proxy/7436/2
+@notAPI {
+    not {
+        path /api/v1/*
+    }
+    file {
+        try_files {path} {path}/ /index.html
+    }
+}
+rewrite @notAPI {http.matchers.file.relative}
 
 reverse_proxy /api/v1/* http://shuffle-backend:5001
- 
+
+
 header / { 
 	# avoid clickjacking 
 	X-Frame-Options "DENY" 
@@ -42,6 +54,4 @@ header / {
 	Cache-Control "public" 
 	ETag ""
 	 
-	# If file or directory does not exist redirect to default route
-	try_files {path} {path}/ /index.html 
 }
