@@ -32,7 +32,7 @@ rewrite @notAPI {http.matchers.file.relative}
 reverse_proxy /api/v1/* http://shuffle-backend:5001
 
 
-header / { 
+header /* { 
 	# avoid clickjacking 
 	X-Frame-Options "DENY" 
 	 
